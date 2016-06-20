@@ -24,6 +24,10 @@
     <string name="bottom_navigation_main_item_orientation">Orientation</string>
     <string name="bottom_navigation_adjust_item_blur">Blur</string>
     <string name="bottom_navigation_adjust_item_contrast">Contrast</string>
+    <string name="bottom_navigation_green_color">Green</string>
+    <string name="bottom_navigation_blue_color">Blue</string>
+    <string name="bottom_navigation_red_color">Red</string>
+    <string name="bottom_navigation_alpha_color">Alpha</string>
     <!--Others-->
     <string name="warning_make_gif">You must choose at least 2 frames</string>
     <string name="out_of_limit">You have selected the maximum frames</string>
@@ -46,4 +50,7 @@
         <item>Get photo from gallery</item>
         <item>Get photo from facebook</item>
     </string-array>
+    <string name="bottom_navigation_adjust_item_grayscale">Gray Scale</string>
+    <string name="bottom_navigation_adjust_item_negative">Negative</string>
+    <string name="loading_effect">Loading Effect</string>
 </resources>

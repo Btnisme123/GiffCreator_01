@@ -14,10 +14,6 @@ public class ColorEffect extends EditingEffect {
     private float mValue;
     private Type mType;
 
-    public ColorEffect() {
-
-    }
-
     public ColorEffect(float mValue, Type mType) {
         this.mValue = mValue;
         this.mType = mType;
@@ -34,7 +30,7 @@ public class ColorEffect extends EditingEffect {
         switch (mType) {
             case RED:
                 colorTransform = new float[]{
-                        mValue, 0, 0, 0, 0,
+                        1f, 0, 0, 0, mValue,
                         0, 1f, 0, 0, 0,
                         0, 0, 1f, 0, 0,
                         0, 0, 0, 1f, 0};
@@ -42,7 +38,7 @@ public class ColorEffect extends EditingEffect {
             case GREEN:
                 colorTransform = new float[]{
                         1f, 0, 0, 0, 0,
-                        0, mValue, 0, 0, 0,
+                        0, 1f, 0, 0, mValue,
                         0, 0, 1f, 0, 0,
                         0, 0, 0, 1f, 0};
                 break;
@@ -50,7 +46,7 @@ public class ColorEffect extends EditingEffect {
                 colorTransform = new float[]{
                         1f, 0, 0, 0, 0,
                         0, 1f, 0, 0, 0,
-                        0, 0, mValue, 0, 0,
+                        0, 0, 1f, 0, mValue,
                         0, 0, 0, 1f, 0};
                 break;
             case ALPHA:
@@ -58,7 +54,7 @@ public class ColorEffect extends EditingEffect {
                         1f, 0, 0, 0, 0,
                         0, 1f, 0, 0, 0,
                         0, 0, 1f, 0, 0,
-                        0, 0, 0, mValue, 0};
+                        0, 0, 0, 1f, mValue};
                 break;
         }
         ColorMatrix colorMatrix = new ColorMatrix(colorTransform);

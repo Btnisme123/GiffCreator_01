@@ -27,11 +27,26 @@
             android:layout_height="wrap_content"
             android:scrollbars="none">
 
-            <LinearLayout
-                android:id="@+id/bottom_navigation_container"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" />
+                android:layout_height="wrap_content">
+
+                <com.framgia.gifcreator.ui.widget.AdjustImageBar
+                    android:id="@+id/adjust_image_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/bottom_navigation_color"
+                    android:gravity="center"
+                    android:visibility="visible" />
+
+                <LinearLayout
+                    android:id="@+id/bottom_navigation_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+
+            </FrameLayout>
+
         </HorizontalScrollView>
     </RelativeLayout>
 </RelativeLayout>

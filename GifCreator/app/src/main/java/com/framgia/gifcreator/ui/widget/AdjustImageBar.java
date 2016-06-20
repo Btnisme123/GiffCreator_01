@@ -55,9 +55,7 @@ public class AdjustImageBar extends RelativeLayout implements View.OnClickListen
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        if (mOnAdjustImageBarItemInteractListener != null) {
-            mOnAdjustImageBarItemInteractListener.onSeekBarValueChange(progress);
-        }
+
     }
 
     @Override
@@ -67,7 +65,9 @@ public class AdjustImageBar extends RelativeLayout implements View.OnClickListen
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-
+        if (mOnAdjustImageBarItemInteractListener != null) {
+            mOnAdjustImageBarItemInteractListener.onSeekBarValueChange(seekBar.getProgress());
+        }
     }
 
     public void setMaxValue(int max) {
@@ -80,6 +80,10 @@ public class AdjustImageBar extends RelativeLayout implements View.OnClickListen
         mAdjustSeekBar.setOnSeekBarChangeListener(this);
         findViewById(R.id.button_cancel).setOnClickListener(this);
         findViewById(R.id.button_complete).setOnClickListener(this);
+    }
+
+    public void setProgress(int progress) {
+        if(mAdjustSeekBar!=null)mAdjustSeekBar.setProgress(progress);
     }
 
     public interface OnAdjustImageBarItemInteractListener {

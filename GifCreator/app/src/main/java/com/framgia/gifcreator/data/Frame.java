@@ -10,6 +10,7 @@ public class Frame {
     private String mPhotoPath;
     private Bitmap mFrame;
     private boolean mIsChosen;
+
     public Frame() {
     }
 

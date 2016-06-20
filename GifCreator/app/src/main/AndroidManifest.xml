@@ -25,5 +25,8 @@
         <activity android:name=".ui.activity.AdjustImageActivity" />
         <activity android:name=".ui.activity.PreviewGifActivity" />
         <activity android:name=".ui.activity.ShowGifDetailActivity" />
+        <activity
+            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:theme="@style/AppThemeCrop" />
     </application>
 </manifest>

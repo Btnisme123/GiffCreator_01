@@ -5,15 +5,9 @@ import android.graphics.Matrix;
 
 public class RotationEffect extends EditingEffect {
 
-    private int mDegree;
-
-    public RotationEffect(int mDegree) {
-        this.mDegree = mDegree;
-    }
-
     public Bitmap rotate(Bitmap mBitmap) {
         Matrix matrix = new Matrix();
-        matrix.postRotate(mDegree);
+        matrix.postRotate(90);
         return Bitmap.createBitmap(mBitmap, 0, 0, mBitmap.getWidth(), mBitmap.getHeight(), matrix, true);
     }
 

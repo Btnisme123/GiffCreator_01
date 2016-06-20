@@ -9,4 +9,5 @@
     <dimen name="frame_border_width">1dp</dimen>
     <dimen name="dialog_width">300dp</dimen>
     <dimen name="default_button_corner_radius">3dp</dimen>
+    <dimen name="view_height">100dp</dimen>
 </resources>
