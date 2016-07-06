@@ -16,12 +16,16 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@+id/button_complete"
-        android:layout_toRightOf="@+id/button_cancel" />
+        android:layout_toRightOf="@+id/button_cancel"
+        android:maxHeight="@dimen/common_size_8"
+        android:minHeight="@dimen/common_size_5"
+        android:progressDrawable="@drawable/seekbar"
+        android:thumb="@color/seekbar_thum_color" />
 
     <ImageView
         android:id="@+id/button_complete"
-        android:layout_width="@dimen/adjust_seek_bar_button_size"
-        android:layout_height="@dimen/adjust_seek_bar_button_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_marginRight="@dimen/common_size_5"

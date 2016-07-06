@@ -48,6 +48,7 @@ public class PreviewGifActivity extends BaseActivity implements SeekBar.OnSeekBa
         enableToolbar();
         enableBackButton();
         loadFrames();
+        mToolbar.setTitle(R.string.title_preview_gif_activity);
     }
 
     @Override
@@ -65,7 +66,7 @@ public class PreviewGifActivity extends BaseActivity implements SeekBar.OnSeekBa
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         mTextFps.setText(MessageFormat.format(getString(R.string.fps), progress + 1));
         mInterval = 1000 / (progress + 1);
-        mCountDownTimer.cancel();
+        if (mCountDownTimer != null) mCountDownTimer.cancel();
         startPreview();
     }
 
@@ -85,6 +86,7 @@ public class PreviewGifActivity extends BaseActivity implements SeekBar.OnSeekBa
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+        ShowListChosenImageActivity.sCanAdjustFrame = false;
     }
 
     @Override

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/frame_border"
     android:clickable="true"
-    android:padding="@dimen/common_size_10">
+    android:padding="@dimen/common_size_5">
 
     <ImageView
         android:id="@+id/thumbnail"

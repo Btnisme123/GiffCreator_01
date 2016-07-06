@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#e6750c</color>
+    <color name="colorPrimary">#FFC107</color>
+    <color name="colorPrimaryDark">#FFA000</color>
+    <color name="colorAccent">#FF9800</color>
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
     <color name="floating_button_background_color">#EC850F</color>
@@ -10,4 +10,8 @@
     <color name="bottom_navigation_color">#f2741f</color>
     <color name="bottom_navigation_item_highlight_color">#e77224</color>
     <color name="flat_button_highlight_color">#D5D2D2</color>
+    <color name="background_color">#eaeaea</color>
+    <color name="seekbar_thum_color">#25CCA2</color>
+    <color name="seekbar_background_color">#1C7C64</color>
+    <color name="seekbar_progress_color">#3DB5C7</color>
 </resources>

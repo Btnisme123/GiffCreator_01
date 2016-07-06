@@ -10,6 +10,7 @@ import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
@@ -33,7 +34,7 @@ import java.util.List;
  * Created by yue on 09/06/2016.
  */
 public class ShowGifDetailActivity extends BaseActivity implements
-        GetPhotoDialog.OnDialogItemChooseListener, OnListItemInteractListener {
+        GetPhotoDialog.OnDialogItemChooseListener, OnListItemInteractListener, View.OnClickListener {
 
     private final String IMAGE_EXTENSION = ".jpg";
     private final String PICK_IMAGE_TYPE = "image/*";
@@ -59,7 +60,7 @@ public class ShowGifDetailActivity extends BaseActivity implements
         mPagerAdapter = new ThumbnailPagerAdapter(this, mThumbnailPager, mFrames);
         mPagerAdapter.setOnListItemInteractListener(this);
         mThumbnailPager.setClipToPadding(false);
-        mThumbnailPager.setPageMargin(getResources().getDimensionPixelSize(R.dimen.common_size_15));
+        mThumbnailPager.setPageMargin(getResources().getDimensionPixelSize(R.dimen.common_size_10));
         mThumbnailPager.setOffscreenPageLimit(OFF_SCREEN_PAGE_LIMIT);
         mThumbnailPager.setAdapter(mPagerAdapter);
         mLargeImage.getViewTreeObserver().addOnGlobalLayoutListener(
@@ -94,11 +95,7 @@ public class ShowGifDetailActivity extends BaseActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_edit_image:
-                Intent intent = new Intent(this, AdjustImageActivity.class);
-                intent.putExtra(Constants.EXTRA_PHOTO_PATH,
-                        mFrames.get(mCurrentPosition).getPhotoPath());
-                intent.putExtra(Constants.EXTRA_POSITION, mCurrentPosition);
-                startActivityForResult(intent, Constants.REQUEST_ADJUST);
+                moveToNextActivity();
                 break;
             case android.R.id.home:
                 onBackPressed();
@@ -224,10 +221,18 @@ public class ShowGifDetailActivity extends BaseActivity implements
         dialog.showDialog();
     }
 
+    @Override
+    public void onClick(View v) {
+        moveToNextActivity();
+    }
+
     private void findViews() {
         mLargeImage = (ImageView) findViewById(R.id.large_image);
         mThumbnailPager = (ViewPager) findViewById(R.id.thumbnail_pager);
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
+
+        // Set listener
+        mLargeImage.setOnClickListener(this);
     }
 
     private void getData() {
@@ -266,5 +271,13 @@ public class ShowGifDetailActivity extends BaseActivity implements
         Uri contentUri = Uri.fromFile(file);
         mediaScanIntent.setData(contentUri);
         this.sendBroadcast(mediaScanIntent);
+    }
+
+    private void moveToNextActivity() {
+        Intent intent = new Intent(this, AdjustImageActivity.class);
+        intent.putExtra(Constants.EXTRA_PHOTO_PATH,
+                mFrames.get(mCurrentPosition).getPhotoPath());
+        intent.putExtra(Constants.EXTRA_POSITION, mCurrentPosition);
+        startActivityForResult(intent, Constants.REQUEST_ADJUST);
     }
 }

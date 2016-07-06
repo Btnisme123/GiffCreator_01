@@ -7,13 +7,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.framgia.gifcreator.R;
 import com.framgia.gifcreator.data.Constants;
 import com.framgia.gifcreator.data.Frame;
 import com.framgia.gifcreator.ui.activity.ShowListChosenImageActivity;
 import com.framgia.gifcreator.util.AppHelper;
-import com.framgia.gifcreator.util.BitmapWorkerTask;
 
 import java.util.List;
 
@@ -40,11 +44,18 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         final Frame frame = mFrames.get(position);
-        BitmapWorkerTask decodeFileTask = new BitmapWorkerTask(holder.mImageView, frame,
-                mContext.getResources().getDimensionPixelSize(R.dimen.image_item_width),
-                mContext.getResources().getDimensionPixelSize(R.dimen.image_item_height),
-                true);
-        decodeFileTask.execute(BitmapWorkerTask.TASK_DECODE_FILE, frame.getPhotoPath());
+        Glide.with(mContext).load(frame.getPhotoPath()).listener(new RequestListener<String, GlideDrawable>() {
+            @Override
+            public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                holder.mProgressBar.setVisibility(View.INVISIBLE);
+                return false;
+            }
+        }).centerCrop().into(holder.mImageView);
         holder.mCheckbox.setChecked(frame.isChosen());
         holder.mImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,17 +69,18 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
             @Override
             public void onClick(View v) {
                 if (!ShowListChosenImageActivity.sCanAdjustFrame) {
-                    if (ShowListChosenImageActivity.sNumberOfFrames < Constants.MAXIMUM_FRAMES) {
-                        frame.setChecked(!frame.isChosen());
-                        if (frame.isChosen()) {
+                    if (frame.isChosen()) {
+                        frame.setChecked(false);
+                        ShowListChosenImageActivity.sNumberOfFrames--;
+                    } else {
+                        if (ShowListChosenImageActivity.sNumberOfFrames < Constants.MAXIMUM_FRAMES) {
+                            frame.setChecked(true);
                             ShowListChosenImageActivity.sNumberOfFrames++;
                         } else {
-                            ShowListChosenImageActivity.sNumberOfFrames--;
+                            AppHelper.showSnackbar(ShowListChosenImageActivity.sCoordinatorLayout,
+                                    R.string.out_of_limit);
+                            frame.setChecked(false);
                         }
-                    } else {
-                        AppHelper.showSnackbar(ShowListChosenImageActivity.sCoordinatorLayout,
-                                R.string.out_of_limit);
-                        frame.setChecked(false);
                     }
                     notifyItemChanged(position);
                 } else {
@@ -99,11 +111,13 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     class ViewHolder extends RecyclerView.ViewHolder {
         public ImageView mImageView;
         public CheckBox mCheckbox;
+        public ProgressBar mProgressBar;
 
         public ViewHolder(View itemView) {
             super(itemView);
             mImageView = (ImageView) itemView.findViewById(R.id.image_choosing);
             mCheckbox = (CheckBox) itemView.findViewById(R.id.checkbox_item);
+            mProgressBar = (ProgressBar) itemView.findViewById(R.id.progress_bar);
         }
     }
 }

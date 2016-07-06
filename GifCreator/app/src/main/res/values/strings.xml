@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GifCreator</string>
+    <string name="app_name">Gif Creator</string>
     <!--Title-->
     <string name="title_adjust_image_activity">Adjust Image</string>
     <string name="title_show_chosen_images_activity">Chosen Images</string>
@@ -13,13 +13,15 @@
     <string name="action_apply_effect">Apply</string>
     <string name="action_select_all">Select All</string>
     <string name="action_delete">Delete</string>
+    <string name="action_edit_image">Edit Image</string>
+    <string name="action_share">Share</string>
+    <string name="facebook_app_id">215209978872163</string>
     <!--Bottom navigation items-->
     <string name="bottom_navigation_item_adjust">Adjust</string>
     <string name="bottom_navigation_item_effect">Effect</string>
     <string name="bottom_navigation_item_color">Color</string>
     <string name="bottom_navigation_item_crop">Crop</string>
     <string name="bottom_navigation_item_orientation">Orientation</string>
-    <string name="action_edit_image">Edit image</string>
     <string name="bottom_navigation_main_item_adjust">Adjust</string>
     <string name="bottom_navigation_main_item_effect">Effect</string>
     <string name="bottom_navigation_main_item_color">Color</string>
@@ -31,6 +33,7 @@
     <string name="bottom_navigation_blue_color">Blue</string>
     <string name="bottom_navigation_red_color">Red</string>
     <string name="bottom_navigation_alpha_color">Alpha</string>
+    <string name="bottom_navigation_edge_detect">Edge Detect</string>
     <!--Others-->
     <string name="warning_make_gif">You must choose at least 2 frames</string>
     <string name="out_of_limit">You have selected the maximum frames</string>
@@ -69,6 +72,8 @@
     <string name="error">Error</string>
     <string name="cannot_access_camera">Cannot access camera</string>
     <string name="cannot_access_gallery">Cannot access gallery</string>
+    <string name="cannot_access_network">Cannot access to network</string>
     <string name="cannot_export_gif">Cannot export gif</string>
     <string name="cannot_save">Cannot save image</string>
+    <string name="downloading">Downloading ...</string>
 </resources>

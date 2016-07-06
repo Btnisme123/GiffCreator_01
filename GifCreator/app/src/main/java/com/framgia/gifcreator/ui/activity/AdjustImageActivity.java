@@ -24,6 +24,7 @@ import com.framgia.gifcreator.data.Constants;
 import com.framgia.gifcreator.data.Frame;
 import com.framgia.gifcreator.effect.ColorEffect;
 import com.framgia.gifcreator.effect.ContrastEffect;
+import com.framgia.gifcreator.effect.EdgeDetect;
 import com.framgia.gifcreator.effect.EditingEffect;
 import com.framgia.gifcreator.effect.GrayScaleEffect;
 import com.framgia.gifcreator.effect.NegativeEffect;
@@ -44,7 +45,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class AdjustImageActivity extends BaseActivity implements
@@ -52,6 +52,7 @@ public class AdjustImageActivity extends BaseActivity implements
         HandlingImageAsyncTask.OnProgressListener,
         AdjustImageBar.OnAdjustImageBarItemInteractListener {
 
+    public static Context sContext;
     private final int BOTTOM_NAVIGATION_LEVEL_1 = 1;
     private final int BOTTOM_NAVIGATION_LEVEL_2 = 2;
     private final float IMAGE_VALUE = 127;
@@ -69,7 +70,7 @@ public class AdjustImageActivity extends BaseActivity implements
     private Bitmap mProcessedImage;
     private MenuItem mItemApplyEffect;
     private List<BottomNavigationItem> mBottomNavigationMainItems;
-    private List<BottomNavigationItem> mBottomNavigationAdjustItems;
+    private List<BottomNavigationItem> mBottomNavigationEffectItems;
     private List<BottomNavigationItem> mBottomNavigationColorItems;
     private AdjustImageBar mAdjustmentImageBar;
     private HandlingImageAsyncTask mHandlingImageAsyncTask;
@@ -79,10 +80,17 @@ public class AdjustImageActivity extends BaseActivity implements
     private NegativeEffect mNegativeEffect;
     private ColorEffect mColorEffect;
     private ContrastEffect mContrastEffect;
+    private EdgeDetect mEdgeDetectEffect;
     private Uri mImageUri;
     private HorizontalScrollView mHorizontalScrollView;
     private int mBottomNavigationLevel;
     private int mPosition;
+    private int mCurrentProgress;
+    private int mOriginRedProgress;
+    private int mOriginGreenProgress;
+    private int mOriginBlueProgress;
+    private int mOriginAlphaProgress;
+    private int mOriginContrastProgress;
     private boolean mIsFirst;
     private boolean mIsProcessing;
     private boolean mIsImageEdited;
@@ -91,6 +99,7 @@ public class AdjustImageActivity extends BaseActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sContext = this;
         findViews();
         getData();
         mIsFirst = true;
@@ -112,7 +121,7 @@ public class AdjustImageActivity extends BaseActivity implements
         enableBackButton();
         mAdjustmentImageBar.setOnAdjustImageBarItemInteractListener(this);
         mAdjustmentImageBar.setMaxValue(MAX_PROGRESS);
-        mAdjustmentImageBar.setProgress(START_PROGRESS);
+        mToolbar.setTitle(R.string.title_adjust_image_activity);
     }
 
     @Override
@@ -140,8 +149,8 @@ public class AdjustImageActivity extends BaseActivity implements
         }
         String title = item.getTitle();
         mAdjustImage.setImageBitmap(mOriginImage);
-        if (title.equals(getString(R.string.bottom_navigation_main_item_adjust))) {
-            makeBottomNavigation(mBottomNavigationAdjustItems);
+        if (title.equals(getString(R.string.bottom_navigation_main_item_effect))) {
+            makeBottomNavigation(mBottomNavigationEffectItems);
             mBottomNavigationLevel = BOTTOM_NAVIGATION_LEVEL_2;
             mIsProcessing = false;
         } else if (title.equals(getString(R.string.bottom_navigation_adjust_item_blur))) {
@@ -159,15 +168,12 @@ public class AdjustImageActivity extends BaseActivity implements
             mIsProcessing = true;
         } else if (title.equals(getString(R.string.bottom_navigation_main_item_orientation))) {
             showItemApplyEffect();
-            if (mProcessedImage != null) mProcessedImage = null;
             setEffect(mRotationEffect);
             mIsProcessing = true;
         } else if (title.equals(getString(R.string.bottom_navigation_main_item_color))) {
-            showItemApplyEffect();
-            openSeekbar();
             makeBottomNavigation(mBottomNavigationColorItems);
             mBottomNavigationLevel = BOTTOM_NAVIGATION_LEVEL_2;
-            mIsProcessing = true;
+            mIsProcessing = false;
         } else if (title.equals(getString(R.string.bottom_navigation_blue_color))) {
             showItemApplyEffect();
             openSeekbar();
@@ -195,10 +201,18 @@ public class AdjustImageActivity extends BaseActivity implements
             mIsProcessing = true;
         } else if (title.equals(getString(R.string.bottom_navigation_main_item_crop))) {
             if (PermissionUtil.isStoragePermissionGranted(this)) {
+                if (mProcessedImage != null) {
+                    mOriginImage = null;
+                    mOriginImage = BitmapHelper.copy(mProcessedImage);
+                }
                 saveProcessedImage();
                 startCrop();
                 mIsProcessing = true;
             }
+        } else if (title.equals(getString(R.string.bottom_navigation_edge_detect))) {
+            showItemApplyEffect();
+            setEffect(mEdgeDetectEffect);
+            mIsProcessing = true;
         }
     }
 
@@ -210,6 +224,9 @@ public class AdjustImageActivity extends BaseActivity implements
                 break;
             case R.id.action_apply_effect:
                 if (mIsProcessing) {
+                    mFrame.setFrame(null);
+                    mFrame.setFrame(BitmapHelper.copy(mProcessedImage));
+                    mOriginImage = null;
                     mOriginImage = BitmapHelper.copy(mProcessedImage);
                     mProcessedImage = null;
                     makeBottomNavigation(mBottomNavigationMainItems);
@@ -217,6 +234,23 @@ public class AdjustImageActivity extends BaseActivity implements
                     mBottomNavigationLevel = BOTTOM_NAVIGATION_LEVEL_1;
                     mIsProcessing = false;
                     mIsImageEdited = true;
+                    switch (mEffectType) {
+                        case RED:
+                            mOriginRedProgress = mCurrentProgress;
+                            break;
+                        case GREEN:
+                            mOriginGreenProgress = mCurrentProgress;
+                            break;
+                        case BLUE:
+                            mOriginBlueProgress = mCurrentProgress;
+                            break;
+                        case ALPHA:
+                            mOriginAlphaProgress = mCurrentProgress;
+                            break;
+                        case CONTRAST:
+                            mOriginContrastProgress = mCurrentProgress;
+                            break;
+                    }
                 } else {
                     backToPreviousActivity();
                 }
@@ -230,7 +264,8 @@ public class AdjustImageActivity extends BaseActivity implements
         if (mIsProcessing) {
             if (mItemApplyEffect != null && !mIsImageEdited) mItemApplyEffect.setVisible(false);
             if (mAdjustmentImageBar.getVisibility() == View.VISIBLE) closeSeekbar();
-            mProcessedImage = null;
+            mProcessedImage = mOriginImage = null;
+            mOriginImage = BitmapHelper.copy(mFrame.getFrame());
             mAdjustImage.setImageBitmap(mOriginImage);
             makeBottomNavigation(mBottomNavigationMainItems);
             mBottomNavigationLevel = BOTTOM_NAVIGATION_LEVEL_1;
@@ -255,6 +290,7 @@ public class AdjustImageActivity extends BaseActivity implements
                             }
                         });
                 dialogBuilder.show();
+                ShowListChosenImageActivity.sCanAdjustFrame = true;
             }
             closeSeekbar();
         }
@@ -264,13 +300,12 @@ public class AdjustImageActivity extends BaseActivity implements
     public void onButtonClickListener(@AdjustImageBar.AdjustImageBarButtonDef int button) {
         switch (button) {
             case AdjustImageBar.BUTTON_COMPLETE:
+                mOriginImage = null;
+                mOriginImage = BitmapHelper.copy(mProcessedImage);
                 break;
             case AdjustImageBar.BUTTON_CANCEL:
-                mProcessedImage = null;
-                mOriginImage = null;
-                mOriginImage = BitmapHelper.copy(mFrame.getFrame());
                 mAdjustImage.setImageBitmap(mOriginImage);
-                openSeekbar();
+                resetSeekbarProgress();
                 break;
         }
     }
@@ -280,18 +315,23 @@ public class AdjustImageActivity extends BaseActivity implements
         float progressColorValue = progress - IMAGE_VALUE;
         switch (mEffectType) {
             case RED:
+                mCurrentProgress = progress;
                 mColorEffect = new ColorEffect(progressColorValue, ColorEffect.Type.RED);
                 break;
             case BLUE:
+                mCurrentProgress = progress;
                 mColorEffect = new ColorEffect(progressColorValue, ColorEffect.Type.BLUE);
                 break;
             case GREEN:
+                mCurrentProgress = progress;
                 mColorEffect = new ColorEffect(progressColorValue, ColorEffect.Type.GREEN);
                 break;
             case ALPHA:
+                mCurrentProgress = progress;
                 mColorEffect = new ColorEffect(progressColorValue, ColorEffect.Type.ALPHA);
                 break;
             case CONTRAST:
+                mCurrentProgress = progress;
                 mContrastEffect = new ContrastEffect(progress);
                 break;
         }
@@ -304,6 +344,7 @@ public class AdjustImageActivity extends BaseActivity implements
 
     @Override
     public void onHandleFinish(Bitmap bitmap) {
+        if (mProcessedImage != null) mProcessedImage = null;
         mProcessedImage = BitmapHelper.copy(bitmap);
         mAdjustImage.setImageBitmap(mProcessedImage);
     }
@@ -316,11 +357,15 @@ public class AdjustImageActivity extends BaseActivity implements
             try {
                 mOriginImage = null;
                 mOriginImage = getImageFromUri(getApplicationContext(), mImageUri);
+                mFrame.setFrame(null);
+                mFrame.setFrame(mOriginImage);
                 mIsProcessing = false;
                 showItemApplyEffect();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            mAdjustImage.setImageBitmap(mOriginImage);
+        } else {
             mAdjustImage.setImageBitmap(mOriginImage);
         }
     }
@@ -353,6 +398,7 @@ public class AdjustImageActivity extends BaseActivity implements
             mAdjustmentImageBar.setVisibility(View.VISIBLE);
             mHorizontalScrollView.setVisibility(View.GONE);
         }
+        resetSeekbarProgress();
     }
 
     private void closeSeekbar() {
@@ -391,7 +437,7 @@ public class AdjustImageActivity extends BaseActivity implements
         if (mBottomNavigationMainItems == null || mBottomNavigationMainItems.size() == 0) {
             mBottomNavigationMainItems = new ArrayList<>();
             mBottomNavigationMainItems.add(new BottomNavigationItem(this,
-                    getString(R.string.bottom_navigation_main_item_adjust), R.drawable.ic_adjust));
+                    getString(R.string.bottom_navigation_main_item_effect), R.drawable.ic_effect));
             mBottomNavigationMainItems.add(new BottomNavigationItem(this,
                     getString(R.string.bottom_navigation_main_item_color), R.drawable.ic_color_palette));
             mBottomNavigationMainItems.add(new BottomNavigationItem(this,
@@ -404,14 +450,16 @@ public class AdjustImageActivity extends BaseActivity implements
     }
 
     private void initBottomNavigationAdjustItems() {
-        if (mBottomNavigationAdjustItems == null || mBottomNavigationAdjustItems.size() == 0) {
-            mBottomNavigationAdjustItems = new ArrayList<>();
-            mBottomNavigationAdjustItems.add(new BottomNavigationItem(this,
+        if (mBottomNavigationEffectItems == null || mBottomNavigationEffectItems.size() == 0) {
+            mBottomNavigationEffectItems = new ArrayList<>();
+            mBottomNavigationEffectItems.add(new BottomNavigationItem(this,
                     getString(R.string.bottom_navigation_adjust_item_blur), R.drawable.ic_blur));
-            mBottomNavigationAdjustItems.add(new BottomNavigationItem(this,
+            mBottomNavigationEffectItems.add(new BottomNavigationItem(this,
                     getString(R.string.bottom_navigation_adjust_item_gray_scale), R.drawable.ic_blur));
-            mBottomNavigationAdjustItems.add(new BottomNavigationItem(this,
+            mBottomNavigationEffectItems.add(new BottomNavigationItem(this,
                     getString(R.string.bottom_navigation_adjust_item_negative), R.drawable.ic_blur));
+            mBottomNavigationEffectItems.add(new BottomNavigationItem(this,
+                    getString(R.string.bottom_navigation_edge_detect), R.drawable.ic_blur));
         }
     }
 
@@ -419,17 +467,18 @@ public class AdjustImageActivity extends BaseActivity implements
         if (mBottomNavigationColorItems == null || mBottomNavigationColorItems.size() == 0) {
             mBottomNavigationColorItems = new ArrayList<>();
             mBottomNavigationColorItems.add(new BottomNavigationItem(this,
-                    getString(R.string.bottom_navigation_green_color), R.drawable.ic_color_red));
+                    getString(R.string.bottom_navigation_green_color), R.drawable.ic_color_green));
             mBottomNavigationColorItems.add(new BottomNavigationItem(this,
                     getString(R.string.bottom_navigation_blue_color), R.drawable.ic_color_blue));
             mBottomNavigationColorItems.add(new BottomNavigationItem(this,
-                    getString(R.string.bottom_navigation_red_color), R.drawable.ic_color_green));
+                    getString(R.string.bottom_navigation_red_color), R.drawable.ic_color_red));
             mBottomNavigationColorItems.add(new BottomNavigationItem(this,
                     getString(R.string.bottom_navigation_alpha_color), R.drawable.ic_color_alpha));
         }
     }
 
     private void makeBottomNavigation(List<BottomNavigationItem> bottomNavigationItems) {
+        mBottomNavigationLevel = BOTTOM_NAVIGATION_LEVEL_1;
         mBottomNavigationContainer.removeAllViews();
         final int size = bottomNavigationItems.size();
         for (int i = 0; i < size; i++) {
@@ -455,6 +504,7 @@ public class AdjustImageActivity extends BaseActivity implements
         int screenHeight = size.y;
         try {
             if (mFrame.getFrame() != null) {
+                if (mOriginImage == null) mOriginImage = BitmapHelper.copy(mFrame.getFrame());
                 Bitmap bitmap = BitmapHelper.resizeBitmap(mOriginImage,
                         screenWidth, screenHeight);
                 mFrame.setPhotoPath(FileUtil.saveImage(AdjustImageActivity.this, bitmap));
@@ -465,7 +515,12 @@ public class AdjustImageActivity extends BaseActivity implements
     }
 
     private void setEffect(EditingEffect effect) {
-        if (mProcessedImage == null) mProcessedImage = BitmapHelper.copy(mOriginImage);
+        if (!(effect instanceof RotationEffect)) {
+            mProcessedImage = null;
+            mProcessedImage = BitmapHelper.copy(mOriginImage);
+        } else {
+            if (mProcessedImage == null) mProcessedImage = BitmapHelper.copy(mOriginImage);
+        }
         mHandlingImageAsyncTask = new HandlingImageAsyncTask(effect, mProcessedImage, mProgressDialog);
         mHandlingImageAsyncTask.setOnProgressListener(this);
         mHandlingImageAsyncTask.execute();
@@ -480,6 +535,9 @@ public class AdjustImageActivity extends BaseActivity implements
         mRotationEffect = new RotationEffect();
         mGrayScaleEffect = new GrayScaleEffect();
         mNegativeEffect = new NegativeEffect();
+        mEdgeDetectEffect = new EdgeDetect();
+        mOriginRedProgress = mOriginContrastProgress = mOriginGreenProgress =
+                mOriginBlueProgress = mOriginAlphaProgress = mCurrentProgress = START_PROGRESS;
     }
 
     private void startCrop() {
@@ -515,5 +573,25 @@ public class AdjustImageActivity extends BaseActivity implements
         int k = Integer.highestOneBit((int) Math.floor(ratio));
         if (k == 0) return 1;
         else return k;
+    }
+
+    private void resetSeekbarProgress() {
+        switch (mEffectType) {
+            case CONTRAST:
+                mAdjustmentImageBar.setProgress(mOriginContrastProgress);
+                break;
+            case RED:
+                mAdjustmentImageBar.setProgress(mOriginRedProgress);
+                break;
+            case GREEN:
+                mAdjustmentImageBar.setProgress(mOriginGreenProgress);
+                break;
+            case BLUE:
+                mAdjustmentImageBar.setProgress(mOriginBlueProgress);
+                break;
+            case ALPHA:
+                mAdjustmentImageBar.setProgress(mOriginAlphaProgress);
+                break;
+        }
     }
 }

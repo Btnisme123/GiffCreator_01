@@ -208,6 +208,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
                     builder.setTitle(R.string.error).setMessage(R.string.cannot_access_gallery).show();
                 }
                 break;
+            case GetPhotoDialog.TYPE_FACEBOOK:
+                if(PermissionUtil.isNetworkPermissionGranted(this)){
+                    intent = new Intent(MainActivity.this, ShowListChosenImageActivity.class);
+                    intent.putExtra(Constants.EXTRA_REQUEST, Constants.REQUEST_FACEBOOK);
+                }else{
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle(R.string.error).setMessage(R.string.cannot_access_network).show();
+                }
+                break;
         }
         if (intent != null) startActivity(intent);
     }

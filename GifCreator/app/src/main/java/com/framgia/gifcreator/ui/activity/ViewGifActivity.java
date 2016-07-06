@@ -1,7 +1,6 @@
 package com.framgia.gifcreator.ui.activity;
 
 import android.content.Intent;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -15,17 +14,14 @@ import com.framgia.gifcreator.ui.base.BaseActivity;
 public class ViewGifActivity extends BaseActivity {
 
     private ImageView mImageGif;
-    private Gif gif;
+    private Gif mGif;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         findViews();
         getData();
-        mImageGif.setBackgroundResource(R.drawable.loading);
-        AnimationDrawable animationDrawable = (AnimationDrawable) mImageGif.getBackground();
-        animationDrawable.start();
-        Glide.with(this).load(gif.getGifPath()).asGif().into(mImageGif);
+        Glide.with(this).load(mGif.getGifPath()).asGif().into(mImageGif);
         enableBackButton();
     }
 
@@ -51,7 +47,7 @@ public class ViewGifActivity extends BaseActivity {
     private void getData() {
         Intent intent = getIntent();
         if (intent != null) {
-            gif = new Gif(intent.getStringExtra(Constants.EXTRA_GIF_PATH));
+            mGif = new Gif(intent.getStringExtra(Constants.EXTRA_GIF_PATH));
         }
     }
 }
